@@ -1,80 +1,78 @@
 import React, { useState, useEffect } from 'react';
 
 const Dashboard = () => {
-  const [todaySales, setTodaySales] = useState(0);
-  const [pendingKhata, setPendingKhata] = useState(0);
-  const [monthlySales, setMonthlySales] = useState(0);
+  const [metrics, setMetrics] = useState({ total_revenue: 0, total_cost: 0, total_profit: 0, total_transactions: 0 });
+  const [loading, setLoading] = useState(true);
+  const [timeFilter, setTimeFilter] = useState('today'); // Default to today
+  
+  const role = localStorage.getItem('role');
 
-  // Load data from local storage when the page opens
   useEffect(() => {
-    // 1. Load Today's Sales
-    const savedSales = Number(localStorage.getItem('todaySales')) || 0;
-    setTodaySales(savedSales);
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    // Pass the filter as a query parameter
+    fetch(`/api/admin?filter=${timeFilter}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.metrics) setMetrics(data.metrics);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [timeFilter]); // Re-run whenever the filter changes
 
-    // 2. Load Monthly Sales
-    const savedMonthly = Number(localStorage.getItem('monthlySales')) || 0;
-    setMonthlySales(savedMonthly);
-
-    // 3. Load Khata Data and calculate the total pending credit
-    const savedKhata = localStorage.getItem('khataData');
-    if (savedKhata) {
-      const customers = JSON.parse(savedKhata);
-      
-      // Sum up all negative balances (money owed to the shop)
-      const totalOwed = customers.reduce((sum, customer) => {
-        if (customer.balance < 0) {
-          return sum + Math.abs(customer.balance);
-        }
-        return sum;
-      }, 0);
-      
-      setPendingKhata(totalOwed);
-    }
-  }, []);
-
-  const clearData = () => {
-    localStorage.setItem('todaySales', 0);
-    setTodaySales(0);
-  };
+  if (loading) return <div className='p-4 text-center text-stone-500'>Loading Analytics...</div>;
 
   return (
-    <div className='p-4 h-full'>
-      <h2 className='text-stone-500 font-bold uppercase mb-4 text-sm'>Dashboard</h2>
+    <div className='p-4 h-full pb-24'>
+      <h2 className='text-stone-500 font-bold uppercase mb-4 text-sm'>
+        {role === 'ADMIN' ? 'Financial Analytics' : 'Shop Register Check'}
+      </h2>
+
+      {/* Filter Buttons */}
+      <div className='bg-white rounded-xl shadow-sm border border-stone-200 p-2 mb-6 flex overflow-x-auto gap-2 no-scrollbar'>
+         {['today', 'weekly', 'monthly', 'yearly', 'all'].map(f => (
+           <button 
+             key={f}
+             onClick={() => setTimeFilter(f)}
+             className={`px-4 py-2 rounded-lg text-sm font-bold capitalize whitespace-nowrap transition ${timeFilter === f ? 'bg-orange-600 text-white' : 'bg-stone-100 text-stone-600'}`}
+           >
+             {f}
+           </button>
+         ))}
+      </div>
       
       <div className='bg-orange-600 text-white p-6 rounded-2xl shadow-md mb-6'>
-        <p className='text-orange-200 font-semibold uppercase text-sm mb-1'>Today's Cash Realized</p>
-        <h3 className='text-4xl font-bold'>₹{todaySales}</h3>
+        <p className='text-orange-200 font-semibold uppercase text-xs mb-1'>Total Cash Revenue</p>
+        <h3 className='text-4xl font-bold'>₹{Number(metrics.total_revenue).toFixed(2)}</h3>
+        <p className='text-xs text-orange-200 mt-2'>{metrics.total_transactions} sales logged</p>
       </div>
 
-      <div className='grid grid-cols-2 gap-4 mb-6'>
-        <div className='bg-white p-4 rounded-xl shadow-sm border border-stone-200'>
-          <p className='text-stone-500 text-xs font-bold uppercase'>Pending Khata</p>
-          <p className='text-xl font-bold text-red-500'>₹{pendingKhata}</p>
-        </div>
-        <div className='bg-white p-4 rounded-xl shadow-sm border border-stone-200'>
-          <p className='text-stone-500 text-xs font-bold uppercase'>This Month</p>
-          <p className='text-xl font-bold text-stone-800'>₹{monthlySales}</p>
-        </div>
-      </div>
+      {role === 'ADMIN' && (
+        <>
+          <div className='bg-emerald-600 text-white p-6 rounded-2xl shadow-md mb-6'>
+            <p className='text-emerald-100 font-semibold uppercase text-xs mb-1'>Net Profit Realized</p>
+            <h3 className='text-4xl font-bold'>₹{Number(metrics.total_profit).toFixed(2)}</h3>
+          </div>
 
-      <div className='bg-white rounded-xl shadow-sm border border-stone-200 p-4'>
-         <h3 className='font-bold text-stone-800 mb-2'>Recent Filters</h3>
-         <div className='flex gap-2'>
-            <button className='bg-orange-100 text-orange-800 px-4 py-2 rounded-lg text-sm font-bold'>Today</button>
-            <button className='bg-stone-100 text-stone-600 px-4 py-2 rounded-lg text-sm font-bold'>Weekly</button>
-            <button className='bg-stone-100 text-stone-600 px-4 py-2 rounded-lg text-sm font-bold'>Monthly</button>
-         </div>
-      </div>
-
-      {/* For MVP demo purposes only - a way to reset the day */}
-      <button 
-        onClick={clearData}
-        className='w-full mt-8 bg-stone-200 text-stone-500 font-bold py-3 rounded-xl'
-      >
-        Reset Day (Demo)
-      </button>
+          <div className='grid grid-cols-2 gap-4 mb-6'>
+            <div className='bg-white p-4 rounded-xl shadow-sm border border-stone-200'>
+              <p className='text-stone-500 text-xs font-bold uppercase'>Revenue</p>
+              <p className='text-xl font-bold text-stone-800'>₹{Number(metrics.total_revenue).toFixed(2)}</p>
+            </div>
+            <div className='bg-white p-4 rounded-xl shadow-sm border border-stone-200'>
+              <p className='text-stone-500 text-xs font-bold uppercase'>Wholesale Cost</p>
+              <p className='text-xl font-bold text-red-500'>₹{Number(metrics.total_cost).toFixed(2)}</p>
+            </div>
+          </div>
+        </>
+      )}
     </div>
-  )
-}
+  );
+};
 
 export default Dashboard;
