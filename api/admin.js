@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
     });
 
-    // GET: Analytics
+    
     if (req.method === 'GET') {
       const { filter } = req.query;
       let timeCondition = '';
@@ -52,15 +52,15 @@ export default async function handler(req, res) {
       return res.status(200).json({ metrics: metrics[0] });
     }
 
-    // POST: Admin Actions (Create Branch OR Password-Protected Data Reset)
+    
     if (req.method === 'POST') {
       if (user.role !== 'ADMIN') return res.status(403).json({ error: 'Admins only' });
 
       const { action, username, password, branch_id, target_branch, admin_password } = req.body;
 
-      // 1. Password-Protected Reset Data
+      
       if (action === 'RESET_DATA') {
-        // Verify Admin Password
+        
         const [adminCheck] = await connection.execute(
           'SELECT * FROM users WHERE id = ? AND password = ?',
           [user.id, admin_password]
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ message: 'Sales data successfully cleared' });
       }
 
-      // 2. Create Branch User Account (Now with bcrypt hashing)
+    
       if (action === 'CREATE_BRANCH') {
           const hashedPass = await bcrypt.hash(password, 10);
           await connection.execute(

@@ -6,7 +6,7 @@ const Khata = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState('');
   
-  // Selected Customer for Adding Credit Items
+  
   const [activeTabCustomer, setActiveTabCustomer] = useState(null);
   const [cart, setCart] = useState({});
 
@@ -17,7 +17,7 @@ const Khata = () => {
     const resK = await fetch('/api/khata', { headers: { 'Authorization': `Bearer ${token}` } });
     if (resK.ok) setCustomers(await resK.json());
 
-    // Fetch Branch Inventory for selecting items
+    
     const resI = await fetch('/api/inventory', { headers: { 'Authorization': `Bearer ${token}` } });
     if (resI.ok) {
       const invData = await resI.json();
@@ -30,7 +30,7 @@ const Khata = () => {
 
   useEffect(() => { fetchKhataAndInventory(); }, []);
 
-  // Add Customer
+  
   const handleAddCustomer = async () => {
     if (!newCustomerName.trim()) return;
     const token = localStorage.getItem('token');
@@ -44,7 +44,7 @@ const Khata = () => {
     fetchKhataAndInventory();
   };
 
-  // Update Cart Quantity
+  
   const updateQty = (id, op) => {
     setCart(prev => {
       const current = prev[id]?.qty || 0;
@@ -53,7 +53,7 @@ const Khata = () => {
     });
   };
 
-  // Submit Credit Items to Customer Tab
+  
   const handleAddCreditToCustomer = async () => {
     const itemsSold = Object.values(cart).filter(i => i.qty > 0);
     if (itemsSold.length === 0) return alert("Select at least 1 item");
@@ -67,9 +67,9 @@ const Khata = () => {
 
     if (res.ok) {
       alert("Items added to credit tab & stock deducted!");
-      setActiveTabCustomer(null); // Closes the modal automatically
+      setActiveTabCustomer(null); 
       
-      // Reset cart quantities to 0 for next time
+      
       setCart(prev => {
         const reset = { ...prev };
         Object.keys(reset).forEach(k => reset[k].qty = 0);
@@ -80,7 +80,7 @@ const Khata = () => {
     }
   };
 
-  // Settle Payment
+  
   const handleSettlePayment = async (customerId) => {
     const amountStr = window.prompt("Enter amount customer is paying to settle debt (₹):");
     if (!amountStr || isNaN(amountStr)) return;
@@ -94,7 +94,7 @@ const Khata = () => {
     fetchKhataAndInventory();
   };
 
-  // Delete Customer
+  
   const handleDeleteCustomer = async (id) => {
     if (window.confirm("Delete this customer account completely?")) {
       const token = localStorage.getItem('token');
@@ -133,7 +133,7 @@ const Khata = () => {
         </div>
       )}
 
-      {/* FIXED: Modal is now centered (items-center) and has z-[999] so it can't hide behind the navbar */}
+     
       {activeTabCustomer && (
         <div className='fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4 backdrop-blur-sm'>
           <div className='bg-white w-full max-w-md rounded-2xl p-5 max-h-[85vh] overflow-y-auto flex flex-col shadow-2xl'>
@@ -169,7 +169,6 @@ const Khata = () => {
         </div>
       )}
 
-      {/* Customer List */}
       <div className='flex flex-col gap-4'>
         {customers.map(c => (
           <div key={c.id} className='bg-white p-4 rounded-2xl shadow-sm border border-stone-200'>
@@ -184,7 +183,7 @@ const Khata = () => {
               </div>
             </div>
 
-            {/* Itemized History */}
+           
             {c.items && c.items.length > 0 && (
               <div className='bg-stone-50 p-2.5 rounded-xl border border-stone-100 mb-3 text-xs flex flex-col gap-1'>
                 <p className='font-bold text-stone-400 uppercase text-[10px]'>Recent Items Taken on Credit:</p>

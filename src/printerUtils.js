@@ -4,14 +4,14 @@ let bluetoothDevice = null;
 let printerCharacteristic = null;
 
 export const connectToPrinter = async () => {
-  // Check if browser supports Web Bluetooth
+  
   if (!navigator.bluetooth) {
     alert("Web Bluetooth is not supported on this browser. Use Chrome on Android.");
     return false;
   }
 
   try {
-    // Look for the HOIN / MPT-II printer
+    
     bluetoothDevice = await navigator.bluetooth.requestDevice({
       filters: [
         { name: 'MPT-II' },
@@ -19,14 +19,14 @@ export const connectToPrinter = async () => {
         { namePrefix: 'HOIN' }
       ],
       optionalServices: [
-        '000018f0-0000-1000-8000-00805f9b34fb', // Standard Chinese thermal printer service
+        '000018f0-0000-1000-8000-00805f9b34fb', 
         '0000ff00-0000-1000-8000-00805f9b34fb'
       ]
     });
 
     const server = await bluetoothDevice.gatt.connect();
 
-    // Find the writable service
+    
     let service;
     try {
       service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
@@ -36,7 +36,7 @@ export const connectToPrinter = async () => {
 
     const characteristics = await service.getCharacteristics();
     
-    // Find the specific data pipeline that allows us to write bytes to the printer
+   
     printerCharacteristic = characteristics.find(
       (c) => c.properties.write || c.properties.writeWithoutResponse
     );
@@ -54,36 +54,40 @@ export const connectToPrinter = async () => {
   }
 };
 
-export const printReceipt = async ({ items, total }) => {
+export const printReceipt = async ({ items, total, timestamp }) => {
   if (!bluetoothDevice || !bluetoothDevice.gatt.connected || !printerCharacteristic) {
     alert('⚠️ Printer not connected. Please connect first.');
     return;
   }
 
   try {
-    // The HOIN HL58 is a 58mm printer, which perfectly fits 32 columns of text
     const encoder = new ReceiptPrinterEncoder({
       language: 'esc-pos',
       columns: 32 
     });
 
-    // Build the receipt layout
+   
+    const dateObj = timestamp ? new Date(timestamp) : new Date();
+    const dateTimeStr = dateObj.toLocaleString('en-IN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+
     let receipt = encoder
       .initialize()
       .align('center')
       .bold(true)
       .size(2, 2)
-      .text('MALAK CHAI')
+      .text('मालक चहा') 
       .newline()
       .size(1, 1)
       .bold(false)
-      .text(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+      .text(dateTimeStr) 
       .newline()
       .text('--------------------------------')
       .newline()
       .align('left');
 
-    // Loop through the cart and add items to the receipt
     items.forEach((item) => {
       receipt = receipt
         .bold(true)
@@ -99,21 +103,21 @@ export const printReceipt = async ({ items, total }) => {
       .newline()
       .align('right')
       .bold(true)
-      .size(2, 1)
-      .text(`TOTAL: Rs.${total}`)
-      .newline()
       .size(1, 1)
+      .text(`Total Payable: Rs.${total}`) 
+      .newline()
       .bold(false)
       .align('center')
       .newline()
       .text('Thank You! Visit Again.')
       .newline()
       .newline()
-      .newline(); // Extra lines to push the paper out for tearing
+      .newline()
+      .newline()
+      .newline() 
+      .newline(); 
 
     const encodedBytes = receipt.encode();
-    
-    // Send the data to the printer
     await printerCharacteristic.writeValue(encodedBytes);
   } catch (error) {
     console.error('Print Error:', error);

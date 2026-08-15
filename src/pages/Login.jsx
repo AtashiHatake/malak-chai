@@ -16,7 +16,6 @@ const Login = ({ setAuth }) => {
       const data = await res.json();
       localStorage.setItem('token', data.token); 
       localStorage.setItem('role', data.role);
-      // Update this line:
       setAuth(true, data.role); 
     } else {
       alert("Invalid login");

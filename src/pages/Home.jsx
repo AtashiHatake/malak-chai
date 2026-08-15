@@ -6,22 +6,20 @@ const Home = () => {
   const [cart, setCart] = useState({});
   const [total, setTotal] = useState(0);
   const [isPrinterConnected, setIsPrinterConnected] = useState(false);
+  const [lastSale, setLastSale] = useState(null);
 
-  // Pulls data from DB and sets/updates the UI
   const fetchInventory = () => {
     const token = localStorage.getItem('token');
     fetch('/api/inventory', { headers: { 'Authorization': `Bearer ${token}` }})
       .then(res => res.json())
       .then(data => {
         setProducts(data);
-        // Ensure cart exists for new items, keep qty if they are tapping fast
         setCart(prev => {
           const newCart = { ...prev };
           data.forEach(p => {
             if (!newCart[p.id]) {
               newCart[p.id] = { ...p, qty: 0 };
             } else {
-              // Update stock number in cart object so UI matches
               newCart[p.id].stock = p.stock; 
             }
           });
@@ -30,9 +28,7 @@ const Home = () => {
       });
   };
 
-  useEffect(() => {
-    fetchInventory();
-  }, []);
+  useEffect(() => { fetchInventory(); }, []);
 
   useEffect(() => {
     let t = 0;
@@ -68,19 +64,20 @@ const Home = () => {
     if (res.ok) {
       alert(`₹${total} Sale Logged!`);
       
-      // Print the receipt if the printer is connected
+      
+      const saleData = { items: itemsSold, total, timestamp: new Date().toISOString() };
+      setLastSale(saleData);
+
       if (isPrinterConnected) {
-        await printReceipt({ items: itemsSold, total });
+        await printReceipt(saleData);
       }
 
-      // 1. Reset all quantities back to zero
       setCart(prev => {
         const reset = { ...prev };
         Object.keys(reset).forEach(k => reset[k].qty = 0);
         return reset;
       });
 
-      // 2. Force an immediate data refresh from the database to reflect new stock
       fetchInventory();
     }
   };
@@ -88,18 +85,31 @@ const Home = () => {
   return (
     <div className='p-4 pb-24 h-full bg-stone-50 min-h-screen'>
       
-      {/* Printer Connection Button */}
-      <div className="mb-4">
+      
+      <div className="mb-4 flex gap-2">
         <button
           onClick={handleConnectPrinter}
-          className={`w-full py-2 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
+          className={`flex-1 py-2 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition ${
             isPrinterConnected
               ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
               : 'bg-stone-800 text-white shadow-md active:scale-95'
           }`}
         >
-          {isPrinterConnected ? '🖨️ Printer Connected' : '🖨️ Connect Bluetooth Printer'}
+          {isPrinterConnected ? '🖨️ Connected' : '🖨️ Connect Printer'}
         </button>
+
+       
+        {lastSale && (
+          <button
+            onClick={async () => {
+              if (!isPrinterConnected) return alert("Connect the printer first!");
+              await printReceipt(lastSale);
+            }}
+            className="flex-1 bg-orange-100 text-orange-700 border border-orange-300 py-2 px-2 rounded-xl font-bold text-xs shadow-sm active:scale-95"
+          >
+            🖨️ Reprint Last
+          </button>
+        )}
       </div>
 
       <div className='flex justify-between items-end mb-6'>

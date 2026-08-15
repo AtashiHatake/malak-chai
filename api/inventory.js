@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Middleware to check token
 const authenticate = (req) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) throw new Error('Unauthorized');
@@ -13,14 +12,13 @@ const authenticate = (req) => {
 export default async function handler(req, res) {
   let user;
 
-  // 1. Authenticate Request
+  
   try {
     user = authenticate(req);
   } catch (e) {
     return res.status(401).json({ error: 'Please log in again' });
   }
 
-  // 2. Establish Database Connection
   let connection;
   try {
     const dbUrl = new URL(process.env.DATABASE_URL);
@@ -36,7 +34,7 @@ export default async function handler(req, res) {
       }
     });
 
-    // --- GET METHOD ---
+    
     if (req.method === 'GET') {
       const query = user.role === 'ADMIN'
         ? 'SELECT * FROM products ORDER BY id DESC'
@@ -47,11 +45,11 @@ export default async function handler(req, res) {
       return res.status(200).json(rows);
     }
 
-    // --- POST METHOD ---
+    
     if (req.method === 'POST') {
       const body = req.body;
 
-      // 1. Admin adding a new product
+    
       if (body.action === 'ADD_PRODUCT') {
         if (user.role !== 'ADMIN') return res.status(403).json({ error: 'Only admins can add products' });
 
@@ -63,7 +61,7 @@ export default async function handler(req, res) {
         return res.status(201).json({ message: 'Product added successfully' });
       }
 
-      // 2. Admin editing an existing product
+      
       if (body.action === 'EDIT_PRODUCT') {
         if (user.role !== 'ADMIN') return res.status(403).json({ error: 'Only admins can edit products' });
 
@@ -75,7 +73,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ message: 'Product updated successfully' });
       }
 
-      // 3. Admin deleting a product
+     
       if (body.action === 'DELETE_PRODUCT') {
         if (user.role !== 'ADMIN') return res.status(403).json({ error: 'Only admins can delete products' });
 
@@ -84,7 +82,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ message: 'Product deleted successfully' });
       }
 
-      // 4. Branch logging a sale
+      
       if (body.cart) {
         for (const item of body.cart) {
           const [prodInfo] = await connection.execute(

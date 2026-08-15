@@ -3,14 +3,14 @@ import React, { useState, useEffect } from 'react';
 const Dashboard = () => {
   const [metrics, setMetrics] = useState({ total_revenue: 0, total_cost: 0, total_profit: 0, total_transactions: 0 });
   const [loading, setLoading] = useState(true);
-  const [timeFilter, setTimeFilter] = useState('today'); // Default to today
+  const [timeFilter, setTimeFilter] = useState('today'); 
   
   const role = localStorage.getItem('role');
 
   useEffect(() => {
     setLoading(true);
     const token = localStorage.getItem('token');
-    // Pass the filter as a query parameter
+    
     fetch(`/api/admin?filter=${timeFilter}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -23,7 +23,7 @@ const Dashboard = () => {
         console.error(err);
         setLoading(false);
       });
-  }, [timeFilter]); // Re-run whenever the filter changes
+  }, [timeFilter]); 
 
   if (loading) return <div className='p-4 text-center text-stone-500'>Loading Analytics...</div>;
 
@@ -33,7 +33,7 @@ const Dashboard = () => {
         {role === 'ADMIN' ? 'Financial Analytics' : 'Shop Register Check'}
       </h2>
 
-      {/* Filter Buttons */}
+      
       <div className='bg-white rounded-xl shadow-sm border border-stone-200 p-2 mb-6 flex overflow-x-auto gap-2 no-scrollbar'>
          {['today', 'weekly', 'monthly', 'yearly', 'all'].map(f => (
            <button 

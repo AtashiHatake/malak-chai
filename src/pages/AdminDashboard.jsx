@@ -3,22 +3,22 @@ import React, { useState, useEffect } from 'react';
 const AdminDashboard = () => {
   const [inventory, setInventory] = useState([]);
   
-  // Add Product Form State
+  
   const [name, setName] = useState('');
   const [buyPrice, setBuyPrice] = useState('');
   const [sellPrice, setSellPrice] = useState('');
   const [stock, setStock] = useState('');
   const [branchId, setBranchId] = useState('');
 
-  // Edit Product Form State
+  
   const [editingItem, setEditingItem] = useState(null);
 
-  // Add Branch Form State
+  
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newBranchId, setNewBranchId] = useState('');
 
-  // Reset Data State
+
   const [resetBranch, setResetBranch] = useState('ALL');
 
   const fetchInventory = async () => {
@@ -36,7 +36,7 @@ const AdminDashboard = () => {
     fetchInventory();
   }, []);
 
-  // Handle adding new product
+  product
   const handleAddProduct = async (e) => {
     e.preventDefault();
     const selectedBranch = Number(branchId);
@@ -71,7 +71,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle editing product
+  
   const handleEditSave = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
@@ -102,7 +102,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle deleting product
+
   const handleDeleteProduct = async (id, productName) => {
     if (!window.confirm(`Are you sure you want to delete "${productName}"?`)) return;
 
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle Add Branch User
+  
   const handleAddBranch = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
-        action: 'CREATE_BRANCH', // Added this so the API triggers the right block
+        action: 'CREATE_BRANCH', 
         username: newUsername,
         password: newPassword,
         branch_id: Number(newBranchId)
@@ -153,7 +153,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Password-Protected Clear Data Handler
   const handleResetData = async () => {
     const password = window.prompt("⚠️ SECURITY CHECK: Enter Admin Password to confirm resetting sales data:");
     if (!password) return;
@@ -181,7 +180,7 @@ const AdminDashboard = () => {
     <div className='p-4 h-full pb-24'>
       <h2 className='text-stone-500 font-bold uppercase mb-4 text-sm'>Admin Control Panel</h2>
       
-      {/* Add New Product Form */}
+      
       <div className='bg-white p-4 rounded-2xl shadow-sm border border-stone-200 mb-6'>
         <h3 className='font-bold text-stone-800 mb-3'>Add New Inventory</h3>
         <form onSubmit={handleAddProduct} className='flex flex-col gap-3'>
@@ -246,7 +245,7 @@ const AdminDashboard = () => {
         </form>
       </div>
 
-      {/* Create Branch Operator Account */}
+      
       <div className='bg-white p-4 rounded-2xl shadow-sm border border-stone-200 mb-6'>
         <h3 className='font-bold text-stone-800 mb-3'>Create Branch Account</h3>
         <form onSubmit={handleAddBranch} className='flex flex-col gap-3'>
@@ -285,7 +284,7 @@ const AdminDashboard = () => {
         </form>
       </div>
 
-      {/* Danger Zone: Reset Data */}
+
       <div className='bg-red-50 p-4 rounded-2xl border border-red-200 mb-6'>
         <h3 className='font-bold text-red-800 mb-2'>Danger Zone: Reset Sales Data</h3>
         <p className='text-xs text-red-600 mb-3'>Clear transactional sales data for testing or fresh starts. Password protected.</p>
@@ -308,7 +307,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Global Inventory List */}
+      
       <h3 className='font-bold text-stone-800 mb-3'>Global Inventory View</h3>
       <div className='flex flex-col gap-3'>
         {inventory.length === 0 ? (
@@ -317,7 +316,7 @@ const AdminDashboard = () => {
           inventory.map(item => (
             <div key={item.id} className='bg-white p-3.5 rounded-2xl shadow-sm border border-stone-200'>
               
-              {/* If item is currently being edited */}
+             
               {editingItem?.id === item.id ? (
                 <form onSubmit={handleEditSave} className='flex flex-col gap-2'>
                   <input 
@@ -367,7 +366,7 @@ const AdminDashboard = () => {
                   </div>
                 </form>
               ) : (
-                /* Standard Product View */
+                
                 <div className='flex justify-between items-center'>
                   <div>
                     <p className='font-bold text-stone-800'>{item.name}</p>

@@ -28,8 +28,7 @@ export default async function handler(req, res) {
     const user = users[0];
     let isMatch = false;
 
-    // SMART CHECK: If the database password starts with '$2', it's a bcrypt hash. 
-    // Otherwise, it's your old plain-text test password.
+    
     if (user.password.startsWith('$2')) {
         isMatch = await bcrypt.compare(password, user.password);
     } else {

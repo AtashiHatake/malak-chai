@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Khata from './pages/Khata';
 import Navbar from './components/Navbar';
-import AdminDashboard from './pages/AdminDashboard'; // We will create this next
+import AdminDashboard from './pages/AdminDashboard'; 
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -20,7 +20,7 @@ const App = () => {
     }
   }, []);
 
-  // Logout Function
+
   const handleLogout = () => {
     localStorage.clear();
     setIsAuthenticated(false);
@@ -28,7 +28,7 @@ const App = () => {
   };
 
   if (!isAuthenticated) {
-    // Pass both auth state and role up from the Login component
+
     return <Login setAuth={(auth, role) => {
       setIsAuthenticated(auth);
       setUserRole(role);
@@ -38,7 +38,7 @@ const App = () => {
   return (
     <div className='bg-stone-100 min-h-screen max-w-md mx-auto relative shadow-2xl font-sans pb-20'>
       
-      {/* Top Header with Logout */}
+
       <header className='bg-orange-600 text-white p-4 sticky top-0 z-10 shadow-md flex justify-between items-center'>
         <h1 className='text-xl font-bold'>Malak Chai {userRole === 'ADMIN' ? '(Admin)' : ''}</h1>
         <button 
@@ -50,7 +50,7 @@ const App = () => {
       </header>
 
       <Routes>
-        {/* Route based on Role */}
+        
         {userRole === 'ADMIN' ? (
           <Route path="/" element={<AdminDashboard />} />
         ) : (
