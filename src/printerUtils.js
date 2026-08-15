@@ -107,10 +107,19 @@ export const printReceipt = async ({ items, total, timestamp }) => {
       .text('*** Thank You! Visit Again ***')
       .newline()
       .newline()
+      .newline()
+      .newline()
       .newline(); 
 
     const encodedBytes = receipt.encode();
-    await printerCharacteristic.writeValue(encodedBytes);
+    
+    const CHUNK_SIZE = 100;
+    for (let i = 0; i < encodedBytes.length; i += CHUNK_SIZE) {
+      const chunk = encodedBytes.slice(i, i + CHUNK_SIZE);
+      await printerCharacteristic.writeValue(chunk);
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
   } catch (error) {
     console.error('Print Error:', error);
     alert('Failed to print token.');
