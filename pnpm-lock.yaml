@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@point-of-sale/receipt-printer-encoder':
+        specifier: ^3.0.3
+        version: 3.0.3
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.1.5(@types/node@26.1.2)(jiti@2.7.0))
@@ -133,6 +136,9 @@ packages:
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
+  '@canvas/image-data@1.1.0':
+    resolution: {integrity: sha512-QdObRRjRbcXGmM1tmJ+MrHcaz1MftF2+W7YI+MsphnsCrmtyfS0d5qJbk0MeSbUeyM/jCb0hmnkXPsy026L7dA==}
+
   '@emnapi/core@1.11.1':
     resolution: {integrity: sha512-RSvbQmHzdKzNsLYa/wHrbc3KN4sYLKAdPZxqiM2HATqv/SBk2/ENSHpvXGaLOMcsAyz0poEGqkmmKYG3OWiJEQ==}
 
@@ -225,6 +231,12 @@ packages:
 
   '@oxc-project/types@0.139.0':
     resolution: {integrity: sha512-r9gHphtCs+1M7J0pw6Sn/hh/Wpa/iQrOOkrNAlVLF/gHq+/CJmHIWKKUUhdWjcD6CIa8idarspCsASiXCXvFUw==}
+
+  '@point-of-sale/codepage-encoder@3.0.2':
+    resolution: {integrity: sha512-Sx+0sE/XgPtMUNKScHpwTIZiHNd/+Mg0udACQJVwPsxH9kUAgIkRi9kRlmWBMCruwOJadjKLyKs8MO8Bh+VS/A==}
+
+  '@point-of-sale/receipt-printer-encoder@3.0.3':
+    resolution: {integrity: sha512-2+xgs6rwNfrkEw9g4LkgQS6k29qnmo3+hOV7Z2xHNBFn8h4FrwquZwL/dBOTwgmQ9sWEYBkj/bQkg9Rz6lL99w==}
 
   '@rolldown/binding-android-arm64@1.1.5':
     resolution: {integrity: sha512-lZg8fqIv2v7FF237bwMgzGZEJvGL79/s5knJ/i6FmsGF4XXlzccZ4jb+TrFIxtSSxFtIpdsgrPZeMk1I9AFcyQ==}
@@ -498,6 +510,12 @@ packages:
 
   caniuse-lite@1.0.30001806:
     resolution: {integrity: sha512-72Cuvd95zbSYPKq6Fhg8eDJRlzgWDf7/mtoZv6Qe/DYNCEBdNxoA3+rZAU2ZhGCpZlns3EssFavaZomckT5Uuw==}
+
+  canvas-dither@1.0.1:
+    resolution: {integrity: sha512-wT1RnV2y9SauibcsfMMCagQTnXmyQq2nJXuX5tTEvo0sXm1vVbJ2r8QxSC3fRQMY3ZgZVq1j54cOvmO4u+Lu/A==}
+
+  canvas-flatten@1.0.1:
+    resolution: {integrity: sha512-UhHeKeWGS23Bm5teZiHk6NEOme1OKCpv6arFovV89dydt0Xz+U4HkPXAKBZS/hmpR15x5U9tDj1ieMQMTwvCAA==}
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
@@ -1019,6 +1037,10 @@ packages:
     resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
     engines: {node: '>=0.10.0'}
 
+  resize-image-data@0.3.1:
+    resolution: {integrity: sha512-6hVRn2S6W1cdycreA6Vth5XRN2NnGs7/RnVpxNw/1OCK8aCoevRFH2WprmQRZDnnH3e6awLv2tTIPuv7/7xeGg==}
+    engines: {node: '>=8.6.0'}
+
   rolldown@1.1.5:
     resolution: {integrity: sha512-t9z29cJjXf/vxQ8dyhCSpt6H6aSwHTk8cT5I3iy6SMXuFpk5mB6PL6XfC8PCwrPTx93udwKUm9HRteAlTGBLiA==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -1261,6 +1283,8 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
+  '@canvas/image-data@1.1.0': {}
+
   '@emnapi/core@1.11.1':
     dependencies:
       '@emnapi/wasi-threads': 1.2.2
@@ -1354,6 +1378,16 @@ snapshots:
     optional: true
 
   '@oxc-project/types@0.139.0': {}
+
+  '@point-of-sale/codepage-encoder@3.0.2': {}
+
+  '@point-of-sale/receipt-printer-encoder@3.0.3':
+    dependencies:
+      '@canvas/image-data': 1.1.0
+      '@point-of-sale/codepage-encoder': 3.0.2
+      canvas-dither: 1.0.1
+      canvas-flatten: 1.0.1
+      resize-image-data: 0.3.1
 
   '@rolldown/binding-android-arm64@1.1.5':
     optional: true
@@ -1538,6 +1572,10 @@ snapshots:
   buffer-equal-constant-time@1.0.1: {}
 
   caniuse-lite@1.0.30001806: {}
+
+  canvas-dither@1.0.1: {}
+
+  canvas-flatten@1.0.1: {}
 
   convert-source-map@2.0.0: {}
 
@@ -1984,6 +2022,10 @@ snapshots:
       react-dom: 19.2.8(react@19.2.8)
 
   react@19.2.8: {}
+
+  resize-image-data@0.3.1:
+    dependencies:
+      '@canvas/image-data': 1.1.0
 
   rolldown@1.1.5:
     dependencies:

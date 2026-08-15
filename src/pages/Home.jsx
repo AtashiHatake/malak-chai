@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { connectToPrinter, printReceipt } from '../printerUtils';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
   const [total, setTotal] = useState(0);
+  const [isPrinterConnected, setIsPrinterConnected] = useState(false);
 
   // Pulls data from DB and sets/updates the UI
   const fetchInventory = () => {
@@ -47,6 +49,11 @@ const Home = () => {
     });
   };
 
+  const handleConnectPrinter = async () => {
+    const connected = await connectToPrinter();
+    setIsPrinterConnected(connected);
+  };
+
   const handleCheckout = async () => {
     if (total === 0) return;
     const token = localStorage.getItem('token');
@@ -61,6 +68,11 @@ const Home = () => {
     if (res.ok) {
       alert(`₹${total} Sale Logged!`);
       
+      // Print the receipt if the printer is connected
+      if (isPrinterConnected) {
+        await printReceipt({ items: itemsSold, total });
+      }
+
       // 1. Reset all quantities back to zero
       setCart(prev => {
         const reset = { ...prev };
@@ -75,6 +87,21 @@ const Home = () => {
 
   return (
     <div className='p-4 pb-24 h-full bg-stone-50 min-h-screen'>
+      
+      {/* Printer Connection Button */}
+      <div className="mb-4">
+        <button
+          onClick={handleConnectPrinter}
+          className={`w-full py-2 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${
+            isPrinterConnected
+              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+              : 'bg-stone-800 text-white shadow-md active:scale-95'
+          }`}
+        >
+          {isPrinterConnected ? '🖨️ Printer Connected' : '🖨️ Connect Bluetooth Printer'}
+        </button>
+      </div>
+
       <div className='flex justify-between items-end mb-6'>
         <h2 className='text-stone-500 font-bold uppercase text-sm'>Live POS</h2>
         <div className='text-right'>
