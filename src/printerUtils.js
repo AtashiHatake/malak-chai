@@ -4,14 +4,12 @@ let bluetoothDevice = null;
 let printerCharacteristic = null;
 
 export const connectToPrinter = async () => {
-  
   if (!navigator.bluetooth) {
     alert("Web Bluetooth is not supported on this browser. Use Chrome on Android.");
     return false;
   }
 
   try {
-    
     bluetoothDevice = await navigator.bluetooth.requestDevice({
       filters: [
         { name: 'MPT-II' },
@@ -19,14 +17,13 @@ export const connectToPrinter = async () => {
         { namePrefix: 'HOIN' }
       ],
       optionalServices: [
-        '000018f0-0000-1000-8000-00805f9b34fb', 
+        '000018f0-0000-1000-8000-00805f9b34fb',
         '0000ff00-0000-1000-8000-00805f9b34fb'
       ]
     });
 
     const server = await bluetoothDevice.gatt.connect();
 
-    
     let service;
     try {
       service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
@@ -36,7 +33,6 @@ export const connectToPrinter = async () => {
 
     const characteristics = await service.getCharacteristics();
     
-   
     printerCharacteristic = characteristics.find(
       (c) => c.properties.write || c.properties.writeWithoutResponse
     );
@@ -66,7 +62,6 @@ export const printReceipt = async ({ items, total, timestamp }) => {
       columns: 32 
     });
 
-   
     const dateObj = timestamp ? new Date(timestamp) : new Date();
     const dateTimeStr = dateObj.toLocaleString('en-IN', {
       day: '2-digit', month: '2-digit', year: 'numeric',
@@ -78,11 +73,11 @@ export const printReceipt = async ({ items, total, timestamp }) => {
       .align('center')
       .bold(true)
       .size(2, 2)
-      .text('मालक चहा') 
+      .text('MALAK CHAI')
       .newline()
       .size(1, 1)
       .bold(false)
-      .text(dateTimeStr) 
+      .text(dateTimeStr)
       .newline()
       .text('--------------------------------')
       .newline()
@@ -103,18 +98,21 @@ export const printReceipt = async ({ items, total, timestamp }) => {
       .newline()
       .align('right')
       .bold(true)
-      .size(1, 1)
-      .text(`Total Payable: Rs.${total}`) 
+      .size(2, 1)
+      .text(`TOTAL: Rs.${total}`)
       .newline()
+      .size(1, 1)
       .bold(false)
       .align('center')
       .newline()
       .text('Thank You! Visit Again.')
       .newline()
+      .text(' ')
       .newline()
       .newline()
       .newline()
-      .newline() 
+      .newline()
+      .text('- - - - - Tear Here - - - - -')
       .newline(); 
 
     const encodedBytes = receipt.encode();

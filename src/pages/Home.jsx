@@ -53,7 +53,10 @@ const Home = () => {
   const handleCheckout = async () => {
     if (total === 0) return;
     const token = localStorage.getItem('token');
-    const itemsSold = Object.values(cart).filter(item => item.qty > 0);
+    
+    const itemsSold = Object.values(cart)
+      .filter(item => item.qty > 0)
+      .map(item => ({ ...item }));
 
     const res = await fetch('/api/inventory', {
       method: 'POST',
@@ -63,7 +66,6 @@ const Home = () => {
 
     if (res.ok) {
       alert(`₹${total} Sale Logged!`);
-      
       
       const saleData = { items: itemsSold, total, timestamp: new Date().toISOString() };
       setLastSale(saleData);
@@ -84,8 +86,6 @@ const Home = () => {
 
   return (
     <div className='p-4 pb-24 h-full bg-stone-50 min-h-screen'>
-      
-      
       <div className="mb-4 flex gap-2">
         <button
           onClick={handleConnectPrinter}
@@ -98,7 +98,6 @@ const Home = () => {
           {isPrinterConnected ? '🖨️ Connected' : '🖨️ Connect Printer'}
         </button>
 
-       
         {lastSale && (
           <button
             onClick={async () => {
