@@ -113,11 +113,15 @@ export const printReceipt = async ({ items, total, timestamp }) => {
 
     const encodedBytes = receipt.encode();
     
-    const CHUNK_SIZE = 100;
+    // CRITICAL FIX: Standard BLE max packet size is 20 bytes. 
+    // Anything larger gets silently dropped by the printer's hardware buffer.
+    const CHUNK_SIZE = 20; 
+    
     for (let i = 0; i < encodedBytes.length; i += CHUNK_SIZE) {
       const chunk = encodedBytes.slice(i, i + CHUNK_SIZE);
       await printerCharacteristic.writeValue(chunk);
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Give the physical thermal head 30ms to burn the data before sending more
+      await new Promise(resolve => setTimeout(resolve, 30)); 
     }
 
   } catch (error) {
