@@ -30,8 +30,13 @@ export default async function handler(req, res) {
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
     });
 
-    
     if (req.method === 'GET') {
+      if (req.query.type === 'branches') {
+        if (user.role !== 'ADMIN') return res.status(403).json({ error: 'Admins only' });
+        const [branches] = await connection.execute('SELECT id, username, branch_id FROM users WHERE role = "BRANCH"');
+        return res.status(200).json(branches);
+      }
+
       const { filter } = req.query;
       let timeCondition = '';
       if (filter === 'today') timeCondition = 'AND DATE(created_at) = CURDATE()';
@@ -52,21 +57,24 @@ export default async function handler(req, res) {
       return res.status(200).json({ metrics: metrics[0] });
     }
 
-    
     if (req.method === 'POST') {
       if (user.role !== 'ADMIN') return res.status(403).json({ error: 'Admins only' });
 
-      const { action, username, password, branch_id, target_branch, admin_password } = req.body;
+      const { action, username, password, branch_id, target_branch, admin_password, user_id, new_password } = req.body;
 
-      
       if (action === 'RESET_DATA') {
-        
         const [adminCheck] = await connection.execute(
-          'SELECT * FROM users WHERE id = ? AND password = ?',
-          [user.id, admin_password]
+          'SELECT * FROM users WHERE id = ?',
+          [user.id]
         );
 
         if (adminCheck.length === 0) {
+          return res.status(401).json({ error: 'Admin not found' });
+        }
+
+        const isMatch = await bcrypt.compare(admin_password, adminCheck[0].password) || (admin_password === adminCheck[0].password);
+
+        if (!isMatch) {
           return res.status(401).json({ error: 'Incorrect Admin Password' });
         }
 
@@ -79,7 +87,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ message: 'Sales data successfully cleared' });
       }
 
-    
       if (action === 'CREATE_BRANCH') {
           const hashedPass = await bcrypt.hash(password, 10);
           await connection.execute(
@@ -87,6 +94,17 @@ export default async function handler(req, res) {
             [username, hashedPass, branch_id]
           );
           return res.status(201).json({ message: 'Branch created successfully' });
+      }
+
+      if (action === 'DELETE_BRANCH') {
+          await connection.execute('DELETE FROM users WHERE id = ? AND role = "BRANCH"', [user_id]);
+          return res.status(200).json({ message: 'Branch deleted' });
+      }
+
+      if (action === 'CHANGE_PASSWORD') {
+          const hashedPass = await bcrypt.hash(new_password, 10);
+          await connection.execute('UPDATE users SET password = ? WHERE id = ? AND role = "BRANCH"', [hashedPass, user_id]);
+          return res.status(200).json({ message: 'Password updated' });
       }
       
       return res.status(400).json({ error: 'Invalid action provided' });

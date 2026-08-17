@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const AdminDashboard = () => {
   const [inventory, setInventory] = useState([]);
-  
+  const [branches, setBranches] = useState([]);
   
   const [name, setName] = useState('');
   const [buyPrice, setBuyPrice] = useState('');
@@ -10,14 +10,11 @@ const AdminDashboard = () => {
   const [stock, setStock] = useState('');
   const [branchId, setBranchId] = useState('');
 
-  
   const [editingItem, setEditingItem] = useState(null);
 
-  
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newBranchId, setNewBranchId] = useState('');
-
 
   const [resetBranch, setResetBranch] = useState('ALL');
 
@@ -28,15 +25,30 @@ const AdminDashboard = () => {
     });
     if (res.ok) {
       const data = await res.json();
-      setInventory(data);
+      setInventory(Array.isArray(data) ? data : []);
+    } else {
+      setInventory([]);
+    }
+  };
+
+  const fetchBranches = async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/admin?type=branches', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setBranches(Array.isArray(data) ? data : []);
+    } else {
+      setBranches([]);
     }
   };
 
   useEffect(() => {
     fetchInventory();
+    fetchBranches();
   }, []);
 
-  product
   const handleAddProduct = async (e) => {
     e.preventDefault();
     const selectedBranch = Number(branchId);
@@ -71,7 +83,6 @@ const AdminDashboard = () => {
     }
   };
 
-  
   const handleEditSave = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
@@ -102,7 +113,6 @@ const AdminDashboard = () => {
     }
   };
 
-
   const handleDeleteProduct = async (id, productName) => {
     if (!window.confirm(`Are you sure you want to delete "${productName}"?`)) return;
 
@@ -123,7 +133,6 @@ const AdminDashboard = () => {
     }
   };
 
-  
   const handleAddBranch = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
@@ -147,9 +156,42 @@ const AdminDashboard = () => {
       setNewUsername('');
       setNewPassword('');
       setNewBranchId('');
+      fetchBranches();
     } else {
       const err = await res.json();
       alert(`Failed: ${err.error}`);
+    }
+  };
+
+  const handleDeleteBranch = async (id, username) => {
+    if (!window.confirm(`Are you sure you want to permanently delete branch account: ${username}?`)) return;
+    
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ action: 'DELETE_BRANCH', user_id: id })
+    });
+
+    if (res.ok) {
+      alert('Branch deleted');
+      fetchBranches();
+    }
+  };
+
+  const handleChangeBranchPassword = async (id, username) => {
+    const newPassword = window.prompt(`Enter new password for ${username}:`);
+    if (!newPassword) return;
+
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ action: 'CHANGE_PASSWORD', user_id: id, new_password: newPassword })
+    });
+
+    if (res.ok) {
+      alert(`Password updated for ${username}`);
     }
   };
 
@@ -179,7 +221,6 @@ const AdminDashboard = () => {
   return (
     <div className='p-4 h-full pb-24'>
       <h2 className='text-stone-500 font-bold uppercase mb-4 text-sm'>Admin Control Panel</h2>
-      
       
       <div className='bg-white p-4 rounded-2xl shadow-sm border border-stone-200 mb-6'>
         <h3 className='font-bold text-stone-800 mb-3'>Add New Inventory</h3>
@@ -245,10 +286,9 @@ const AdminDashboard = () => {
         </form>
       </div>
 
-      
       <div className='bg-white p-4 rounded-2xl shadow-sm border border-stone-200 mb-6'>
-        <h3 className='font-bold text-stone-800 mb-3'>Create Branch Account</h3>
-        <form onSubmit={handleAddBranch} className='flex flex-col gap-3'>
+        <h3 className='font-bold text-stone-800 mb-3'>Manage Branch Accounts</h3>
+        <form onSubmit={handleAddBranch} className='flex flex-col gap-3 mb-4'>
           <input
             required
             type="text"
@@ -282,8 +322,32 @@ const AdminDashboard = () => {
             + Create Branch Login
           </button>
         </form>
-      </div>
 
+        <div className='flex flex-col gap-2 border-t border-stone-200 pt-3'>
+          {branches.map(b => (
+            <div key={b.id} className='flex justify-between items-center bg-stone-50 p-2 rounded-lg border border-stone-200'>
+              <div>
+                <p className='font-bold text-stone-700 text-sm'>{b.username}</p>
+                <p className='text-xs text-stone-500'>Branch ID: {b.branch_id}</p>
+              </div>
+              <div className='flex gap-2'>
+                <button 
+                  onClick={() => handleChangeBranchPassword(b.id, b.username)}
+                  className='bg-stone-200 text-stone-700 px-2 py-1.5 rounded-lg text-xs font-bold'
+                >
+                  Password
+                </button>
+                <button 
+                  onClick={() => handleDeleteBranch(b.id, b.username)}
+                  className='bg-red-100 text-red-600 px-2 py-1.5 rounded-lg text-xs font-bold'
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div className='bg-red-50 p-4 rounded-2xl border border-red-200 mb-6'>
         <h3 className='font-bold text-red-800 mb-2'>Danger Zone: Reset Sales Data</h3>
@@ -307,7 +371,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      
       <h3 className='font-bold text-stone-800 mb-3'>Global Inventory View</h3>
       <div className='flex flex-col gap-3'>
         {inventory.length === 0 ? (
@@ -316,7 +379,6 @@ const AdminDashboard = () => {
           inventory.map(item => (
             <div key={item.id} className='bg-white p-3.5 rounded-2xl shadow-sm border border-stone-200'>
               
-             
               {editingItem?.id === item.id ? (
                 <form onSubmit={handleEditSave} className='flex flex-col gap-2'>
                   <input 
@@ -389,7 +451,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               )}
-
             </div>
           ))
         )}
