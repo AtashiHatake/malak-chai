@@ -42,17 +42,17 @@ JWT_SECRET="your_secure_jwt_secret_key"
    cd malak-chai
 
 2. Install dependencies:
-   npm install
+   pnpm install
 
 3. Start the development server:
-   npm run dev
+   pnpm dev
 
 ## Deployment
 
 This project is configured for deployment on Vercel.
 
 1. Install the Vercel CLI (if not already installed):
-   npm i -g vercel
+   pnpm add -g vercel
 
 2. Deploy directly to production:
    vercel --prod
